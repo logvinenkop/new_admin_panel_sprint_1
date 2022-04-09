@@ -54,7 +54,7 @@ CREATE INDEX IF NOT EXISTS film_work_title_idx ON content.film_work(title);
 CREATE INDEX IF NOT EXISTS person_full_name_idx ON content.person(full_name);
 
 -- Создание индексов для таблицы person_film_work
-CREATE UNIQUE INDEX IF NOT EXISTS film_work_person_idx ON content.person_film_work (film_work_id, person_id);
+CREATE UNIQUE INDEX IF NOT EXISTS film_work_person_idx ON content.person_film_work (film_work_id, person_id, role);
 
 -- Создание индексов для таблицы genre_film_work
 CREATE UNIQUE INDEX IF NOT EXISTS genre_film_work_idx ON content.genre_film_work(film_work_id,genre_id);

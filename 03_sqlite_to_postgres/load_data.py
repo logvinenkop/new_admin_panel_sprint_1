@@ -1,20 +1,47 @@
 import sqlite3
-
-import psycopg2
+import sqlite_load
+import postgres_save
+import os
+from dotenv import load_dotenv
 from psycopg2.extensions import connection as _connection
-from psycopg2.extras import DictCursor
+from dataclasses import asdict, astuple
+from contexts import pg_conn_context, sqlite_conn_context
+
+load_dotenv()
 
 
 def load_from_sqlite(connection: sqlite3.Connection, pg_conn: _connection):
     """Основной метод загрузки данных из SQLite в Postgres"""
-    # postgres_saver = PostgresSaver(pg_conn)
-    # sqlite_loader = SQLiteLoader(connection)
+    batch_size = int(os.environ.get("BATCH_SIZE"))
+    sqlite_loader = sqlite_load.SQLiteLoader(connection)
+    sqlite_tables = sqlite_loader.get_tables_info()
+    postgres_saver = postgres_save.PostgresSaver(pg_conn)
+    for table in sqlite_tables:
+        t_name = table.get("name")
+        print(t_name)
+        sqlite_loader.load_table(t_name)
+        i = 0
+        while i <= table.get("rowcount") // batch_size:
+            batch = sqlite_loader.load_batch_list(t_name, batch_size)
+            print("Batch {bn} of {bs} rows".format(bn=str(i + 1), bs=str(len(batch))))
+            batch_fields = ", ".join(asdict(batch[0]).keys())
+            data = [astuple(row) for row in batch]
 
-    # data = sqlite_loader.load_movies()
-    # postgres_saver.save_all_data(data)
+            postgres_saver.save_data(t_name, batch_fields, data)
+            print("Batch saved to table: " + t_name)
+
+            i += 1
 
 
-if __name__ == '__main__':
-    dsl = {'dbname': 'movies_database', 'user': 'app', 'password': '123qwe', 'host': '127.0.0.1', 'port': 5432}
-    with sqlite3.connect('db.sqlite') as sqlite_conn, psycopg2.connect(**dsl, cursor_factory=DictCursor) as pg_conn:
+if __name__ == "__main__":
+    dsl = {
+        "dbname": os.environ.get("DB_NAME"),
+        "user": os.environ.get("DB_USER"),
+        "password": os.environ.get("DB_PASSWORD"),
+        "host": "127.0.0.1",
+        "port": 5432,
+    }
+    with sqlite_conn_context(
+        os.environ.get("SQLITE_DB_PATH")
+    ) as sqlite_conn, pg_conn_context(dsl) as pg_conn:
         load_from_sqlite(sqlite_conn, pg_conn)

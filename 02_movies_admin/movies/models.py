@@ -100,12 +100,6 @@ class Filmwork(UUIDMixin, TimeStampedMixin):
         default="movie",
     )
 
-    certificate = models.CharField(
-        _("certificate"),
-        max_length=512,
-        blank=True,
-    )
-
     file_path = models.FileField(
         _("file"),
         blank=True,
@@ -132,7 +126,6 @@ class GenreFilmwork(UUIDMixin):
     film_work = models.ForeignKey(
         "Filmwork",
         on_delete=models.CASCADE,
-        # related_name="id",
         verbose_name=_("Film work"),
     )
     genre = models.ForeignKey(
