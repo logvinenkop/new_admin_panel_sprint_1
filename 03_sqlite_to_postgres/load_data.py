@@ -6,8 +6,10 @@ from dotenv import load_dotenv
 from psycopg2.extensions import connection as _connection
 from dataclasses import asdict, astuple
 from contexts import pg_conn_context, sqlite_conn_context
+from migrate_logger import log
 
 load_dotenv()
+my_log = log()
 
 
 def load_from_sqlite(connection: sqlite3.Connection, pg_conn: _connection):
@@ -18,17 +20,19 @@ def load_from_sqlite(connection: sqlite3.Connection, pg_conn: _connection):
     postgres_saver = postgres_save.PostgresSaver(pg_conn)
     for table in sqlite_tables:
         t_name = table.get("name")
-        print(t_name)
+        my_log.debug(t_name)
         sqlite_loader.load_table(t_name)
         i = 0
         while i <= table.get("rowcount") // batch_size:
             batch = sqlite_loader.load_batch_list(t_name, batch_size)
-            print("Batch {bn} of {bs} rows".format(bn=str(i + 1), bs=str(len(batch))))
+            my_log.info(
+                "Batch {bn} of {bs} rows".format(bn=str(i + 1), bs=str(len(batch)))
+            )
             batch_fields = ", ".join(asdict(batch[0]).keys())
             data = [astuple(row) for row in batch]
 
             postgres_saver.save_data(t_name, batch_fields, data)
-            print("Batch saved to table: " + t_name)
+            my_log.info("Batch saved to table: " + t_name)
 
             i += 1
 

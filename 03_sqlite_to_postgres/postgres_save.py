@@ -26,6 +26,5 @@ class PostgresSaver:
             tn=table_name,
             fields=table_fields,
         )
-        print(insert_sql)
         execute_values(self.cursor, insert_sql, data)
         self.conn.commit()

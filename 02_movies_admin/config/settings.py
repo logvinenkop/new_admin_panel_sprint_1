@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 
 import os
+import logging
 from pathlib import Path
 from dotenv import load_dotenv
 from split_settings.tools import include
