@@ -139,6 +139,7 @@ class FilmworkAdmin(admin.ModelAdmin):
 
     list_prefetch_related = ("genres", "persons")
 
+    # Переопределение метода get_queryset для минимизации количества запросов к БД
     def get_queryset(self, request):
         queryset = (
             super().get_queryset(request).prefetch_related(*self.list_prefetch_related)
@@ -146,14 +147,9 @@ class FilmworkAdmin(admin.ModelAdmin):
         return queryset
 
     def get_genres(self, obj):
-        return ",".join([genre.name for genre in obj.genres.all()])
+        return ", ".join([genre.name for genre in obj.genres.all()])
 
     get_genres.short_description = "Жанры фильма"
-
-    # def get_persons(self, obj):
-    #     return ",".join([person.full_name for person in obj.persons.all()])
-
-    # get_persons.short_description = "Участники фильма"
 
     # Фильтрация в списке
     list_filter = (

@@ -162,13 +162,13 @@ class GenreFilmwork(UUIDMixin):
         verbose_name_plural = _("Filmworks gengres")
         constraints = [
             models.UniqueConstraint(
-                fields=["film_work_id", "genre_id"],
+                fields=["film_work", "genre"],
                 name="genre_filmwork_unique",
             ),
         ]
         indexes = [
             models.Index(
-                fields=["film_work_id", "genre_id"],
+                fields=["film_work", "genre"],
                 name="genre_film_work_idx",
             ),
         ]
@@ -202,13 +202,13 @@ class PersonFilmWork(UUIDMixin):
         verbose_name_plural = _("Filmworks persons")
         constraints = [
             models.UniqueConstraint(
-                fields=["film_work_id", "person_id", "role"],
+                fields=["film_work", "person", "role"],
                 name="person_filmwork_unique",
             ),
         ]
         indexes = [
             models.Index(
-                fields=["film_work_id", "person_id", "role"],
+                fields=["film_work", "person", "role"],
                 name="film_work_person_idx",
             ),
         ]
